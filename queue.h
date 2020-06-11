@@ -5,6 +5,8 @@ class set {
 public:
 	int x;
 	int y;
+	set(int x, int y);
+	set();
 };
 
 class QueueNode

@@ -7,8 +7,6 @@ using namespace std;
 
 int main()
 {
-
-
     int r;
     int c;
     int mazeNum = 0;
@@ -33,6 +31,7 @@ int main()
         }
         ++mazeNum;
         string ans;
+        maze.solution(start_x,start_y);
         cout << "Maze #" << mazeNum << endl;
     } while (r != 0 && c != 0);
 }

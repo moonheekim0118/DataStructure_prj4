@@ -1,6 +1,16 @@
 #include "queue.h"
-QueueNode::QueueNode(set element, QueueNode* next)
-{
+
+set::set(int x, int y) {
+	this->x = x;
+	this->y = y;
+}
+
+set::set() {
+	this->x = 0;
+	this->y = 0;
+}
+
+QueueNode::QueueNode(set element, QueueNode* next){
 	this->element = element;
 	this->next = next;
 }
