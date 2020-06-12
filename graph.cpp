@@ -72,7 +72,7 @@ bool graph::is_corner(int nx, int ny) {
 	if (parent_x != x-1 && adjGraph[parent_x+1][parent_y].compare(".") == 0) cnt++;
 	if (parent_y != 0 && adjGraph[parent_x][parent_y-1].compare(".") == 0) cnt++;
 	if (parent_y != y-1 && adjGraph[parent_x][parent_y+1].compare(".") == 0) cnt++;
-	if (cnt < 2) return true;
+	if (cnt < 2 && x>=2) return true;
 	else return false;
 }
 
@@ -81,14 +81,23 @@ string graph::record_trace(int start_x, int start_y, int nx, int ny) {
 	cout << "start x : " << start_x << " start_y: " << start_y << endl;
 	cout << "nx : " << nx << "ny : " << ny << endl;
 	int find_x = wayTrace[nx][ny].parent_x;
-	int find_y = wayTrace[nx][ny].parent_x;
-	cout << " find_x : " << find_x << "   find_y : " << find_y << endl;
-	/*do {
-		answer.append(wayTrace[find_x][find_y].dir, 0, 1);
+	int find_y = wayTrace[nx][ny].parent_y;
+	answer.append(wayTrace[find_x][find_y].dir, 0, 1);
+	cout << answer << endl;
+	while (true){
+		if (find_x == start_x && find_y == start_y) break;
 		find_x = wayTrace[find_x][find_y].parent_x;
 		find_y = wayTrace[find_x][find_y].parent_y;
-	} while (find_x != start_x && find_y != start_y);*/
+		answer.append(wayTrace[find_x][find_y].dir,0,1);
+		cout << wayTrace[find_x][find_y].dir << endl;
+	} 
+
+	for (int i = 0; i < x; i++) {
+		for (int j = 0; j < y; j++)
+			cout << wayTrace[i][j].parent_x << " " << wayTrace[i][j].parent_y << endl;
+	}
 	return answer;
+
 }
 
 bool graph::bfs(string& answer,int start_x, int start_y, int* res_x, int* res_y, string goal) {
@@ -100,39 +109,43 @@ bool graph::bfs(string& answer,int start_x, int start_y, int* res_x, int* res_y,
 	queue.add(push);
 	visited[start_x][start_y] = true;
 	while (!queue.is_Empty()) {
-		set peek = queue.poll();
+		set peek = queue.poll(); //큐에서 꺼내기 
 		int nx = peek.x;
 		int ny = peek.y;
-		if (adjGraph[nx][ny].compare(goal)==0) {
-			(*res_x) = nx;
+		if (adjGraph[nx][ny].compare(goal)==0) { //goal 에 도착했다면 
+			(*res_x) = nx; //goal 위치 저장 
 			(*res_y) = ny;
-			if (goal.compare("F") == 0) {
+			if (goal.compare("F") == 0) { // goal이 F라면 ( 여기서 F는 우회해서 B를 밀었을 경우임)
 				answer.append(record_trace(start_x, start_y, nx, ny)); //F까지의 trace 추가해놓기
 				return true; }
-			if (goal.compare("T") == 0) { 
+			if (goal.compare("T") == 0) {  //goal이 T라면 
 				answer.append(record_trace(start_x,start_y,nx,ny)); //T까지의 trace 추가해놓기 
 				return true; }
 			int x3=-1;
 			int y3=-1;
 			bool flag=false;
-			if (goal.compare("B")==0) {
+			if (goal.compare("B")==0) { //goal이 B라면 
 				answer=record_trace(start_x, start_y, nx, ny); 
 				 // B직전 까지의 trace 저장하기 
-				flag = bfs(answer,nx, ny, &x3, &y3, "T");
-				if (is_corner(nx, ny) == false && flag && (x3 != -1 && y3 != -1)) {
-					(*res_x) = x3;
+				flag = bfs(answer,nx, ny, &x3, &y3, "T"); // T 찾았는지 ?  찾았다면 True 못찾았다면 False 
+				if (is_corner(nx, ny) == false && flag && (x3 != -1 && y3 != -1)) { //코너가 아니고, T를 찾았다면 
+					(*res_x) = x3; //T 찾은 위치 저장후 
 					(*res_y) = y3;
-					return true;
+					return true; //반환 
 				}
-				else if(flag==false || x3==-1 || y3==-1) return false;
-				adjGraph[x3][y3] = "F";
+				else if(flag==false || x3==-1 || y3==-1) return false; // T를 못찾았다면 false 
+				adjGraph[x3][y3] = "F"; //그외.. 코너에 몰린 경우 T자리를 F로 바꾸고, B자리를 '.'으로 바꾸어준다.
 				goal = "F";
 				adjGraph[nx][ny] = ".";
-				start_x = wayTrace[nx][ny].parent_x;
-				start_x = wayTrace[nx][ny].parent_y;
+				start_x = wayTrace[nx][ny].parent_x; //start지점과 nx ny 자리도 바꾸어준다. 박스를 민 자리로.. 
+				start_y = wayTrace[nx][ny].parent_y;
+	
+				nx = start_x;
+				ny = start_y;
 			}
 		}
 		if (nx != 0 && adjGraph[nx - 1][ny].compare("#") != 0 && visited[nx - 1][ny] != true) {
+			//북쪽 
 			string dir;
 			if (goal == "B") dir ="n";
 			else dir ="N";
