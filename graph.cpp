@@ -45,16 +45,34 @@ void graph::addVertex(int x, int y, char item)
 
 string graph::solution(int start_x, int start_y) {
 	string ans="";
-	int res_x;
-	int res_y;
-	bfs(start_x, start_y, &res_x,&res_y,"B");
-	ans = wayTrace[res_x][res_y].dir;
-	return ans;
+	int res_x=-1;
+	int res_y=-1;
+	if (bfs(start_x, start_y, &res_x, &res_y, "B")) {
+		if(res_x==-1 && res_y==-1) return "Impossible";
+		cout << res_x << res_y;
+		ans = wayTrace[res_x][res_y].dir;
+		return ans;
+	}
+	else return "Impossible";
 }
 
 
-void graph::bfs(int start_x, int start_y, int* res_x, int* res_y, string goal) {
+bool graph::is_corner(int nx, int ny) { 
 
+	int parent_x = wayTrace[nx][ny].parent_x;
+	int parent_y = wayTrace[nx][ny].parent_y; 
+
+	// 박스로의 길이 parent로부터의 one way 일때 
+	int cnt = 0;
+	if (parent_x != 0 && adjGraph[parent_x - 1][parent_y].compare(".") == 0) cnt++;
+	if (parent_x != x-1 && adjGraph[parent_x+1][parent_y].compare(".") == 0) cnt++;
+	if (parent_y != 0 && adjGraph[parent_x][parent_y-1].compare(".") == 0) cnt++;
+	if (parent_y != y-1 && adjGraph[parent_x][parent_y+1].compare(".") == 0) cnt++;
+	if (cnt < 2) return true;
+	else return false;
+}
+
+bool graph::bfs(int start_x, int start_y, int* res_x, int* res_y, string goal) {
 	bool** visited = new bool * [x];
 	for (int i = 0; i < x; i++)
 		visited[i] = new bool[y];
@@ -69,7 +87,23 @@ void graph::bfs(int start_x, int start_y, int* res_x, int* res_y, string goal) {
 		if (adjGraph[nx][ny].compare(goal)==0) {
 			(*res_x) = nx;
 			(*res_y) = ny;
-			return;
+			if (goal.compare("F") == 0) return true;
+			if (goal.compare("T") == 0) return true;
+			int x3=-1;
+			int y3=-1;
+			bool flag=false;
+			if (goal.compare("B")==0) {
+				flag = bfs(nx, ny, &x3, &y3, "T");
+				if (is_corner(nx, ny) == false && flag && (x3 != -1 && y3 != -1)) {
+					(*res_x) = x3;
+					(*res_y) = y3;
+					return true;
+				}
+				else if(flag==false || x3==-1 || y3==-1) return false;
+				adjGraph[x3][y3] = "F";
+				goal = "F";
+				adjGraph[nx][ny] = ".";
+			}
 		}
 		if (nx != 0 && adjGraph[nx - 1][ny].compare("#") != 0 && visited[nx - 1][ny] != true) {
 			string dir;
@@ -112,4 +146,5 @@ void graph::bfs(int start_x, int start_y, int* res_x, int* res_y, string goal) {
 			visited[nx][ny+1] = true;
 		}
 	}
+	return false;
 }
