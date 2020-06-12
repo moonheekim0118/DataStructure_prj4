@@ -47,12 +47,13 @@ string graph::solution(int start_x, int start_y) {
 	string ans="";
 	int res_x;
 	int res_y;
-	bfs(start_x, start_y, res_x,res_y,"B");
+	bfs(start_x, start_y, &res_x,&res_y,"B");
+	ans = wayTrace[res_x][res_y].dir;
 	return ans;
 }
 
 
-void graph::bfs(int start_x, int start_y, int& res_x, int& res_y, string goal) {
+void graph::bfs(int start_x, int start_y, int* res_x, int* res_y, string goal) {
 
 	bool** visited = new bool * [x];
 	for (int i = 0; i < x; i++)
@@ -65,45 +66,45 @@ void graph::bfs(int start_x, int start_y, int& res_x, int& res_y, string goal) {
 		set peek = queue.poll();
 		int nx = peek.x;
 		int ny = peek.y;
-		if (adjGraph[nx][ny] == goal) {
-			res_x = x;
-			res_y = y;
+		if (adjGraph[nx][ny].compare(goal)==0) {
+			(*res_x) = nx;
+			(*res_y) = ny;
 			return;
 		}
-		if (nx != 0 && adjGraph[nx - 1][ny] != "#" && visited[nx - 1][ny] != true) {
+		if (nx != 0 && adjGraph[nx - 1][ny].compare("#") != 0 && visited[nx - 1][ny] != true) {
 			string dir;
-			if (goal == "B") dir = "n";
-			else dir = "N";
+			if (goal == "B") dir = wayTrace[nx][ny].dir.append("n");
+			else dir = wayTrace[nx][ny].dir.append("N");
 			pair_info p(nx, ny, dir);
 			wayTrace[nx - 1][ny] = p;
 			set s(nx - 1, ny);
 			queue.add(s);
 			visited[nx - 1][ny] = true;
 		}
-		if (ny != 0 && adjGraph[nx][ny-1] != "#" && visited[nx][ny-1] != true) {
+		if (ny != 0 && adjGraph[nx][ny-1].compare("#") != 0 && visited[nx][ny-1] != true) {
 			string dir;
-			if (goal == "B") dir = "w";
-			else dir = "W";
+			if (goal == "B") dir = wayTrace[nx][ny].dir.append("w");
+			else dir = wayTrace[nx][ny].dir.append("W");
 			pair_info p(nx, ny, dir);
 			wayTrace[nx][ny-1] = p;
 			set s(nx, ny-1);
 			queue.add(s);
 			visited[nx][ny-1] = true;
 		}
-		if (nx != x-1 && adjGraph[nx +1 ][ny] != "#" && visited[nx +1][ny] != true) {
+		if (nx != x-1 && adjGraph[nx +1 ][ny].compare("#")!=0 && visited[nx +1][ny] != true) {
 			string dir;
-			if (goal == "B") dir = "s";
-			else dir = "S";
+			if (goal == "B") dir = wayTrace[nx][ny].dir.append("s");
+			else dir = wayTrace[nx][ny].dir.append("S");
 			pair_info p(nx, ny, dir);
 			wayTrace[nx +1][ny] = p;
 			set s(nx+1, ny);
 			queue.add(s);
 			visited[nx+1][ny] = true;
 		}
-		if (ny!= y-1 && adjGraph[nx][ny+1] != "#" && visited[nx][ny+1] != true) {
+		if (ny!= y-1 && adjGraph[nx][ny+1].compare("#") != 0 && visited[nx][ny+1] != true) {
 			string dir;
-			if (goal == "B") dir = "e";
-			else dir = "E";
+			if (goal == "B") dir = wayTrace[nx][ny].dir.append("e");
+			else dir = wayTrace[nx][ny].dir.append("E");
 			pair_info p(nx, ny, dir);
 			wayTrace[nx][ny+1] = p;
 			set s(nx, ny+1);

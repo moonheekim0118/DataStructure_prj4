@@ -31,7 +31,8 @@ int main()
         }
         ++mazeNum;
         string ans;
-        maze.solution(start_x,start_y);
+        ans=maze.solution(start_x,start_y);
+        cout << ans << endl;
         cout << "Maze #" << mazeNum << endl;
     } while (r != 0 && c != 0);
 }

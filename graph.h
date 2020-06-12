@@ -21,5 +21,5 @@ public:
 	~graph();
 	void addVertex(int x, int y, char item);
 	string solution(int start_x , int start_y);
-	void bfs(int start_x, int start_y , int&res_x, int&res_y, string goal);
+	void bfs(int start_x, int start_y , int*res_x, int*res_y, string goal);
 };
