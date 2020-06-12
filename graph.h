@@ -21,6 +21,7 @@ public:
 	~graph();
 	void addVertex(int x, int y, char item);
 	string solution(int start_x , int start_y);
-	bool bfs(int start_x, int start_y , int*res_x, int*res_y, string goal);
+	bool bfs(string&answer , int start_x, int start_y , int*res_x, int*res_y, string goal);
 	bool is_corner(int nx, int ny);
+	string record_trace(int start_x, int start_y, int nx, int ny);
 };

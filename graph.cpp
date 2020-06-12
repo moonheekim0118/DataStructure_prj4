@@ -1,5 +1,10 @@
 #include "graph.h"
 #include "queue.h"
+/*
+to do : is corner 함수 수정
+        bfs 중첩 수정 
+		record trace 수정  
+*/
 
 pair_info::pair_info(int parent_x, int parent_y, string dir) {
 	this->parent_x = parent_x;
@@ -47,11 +52,10 @@ string graph::solution(int start_x, int start_y) {
 	string ans="";
 	int res_x=-1;
 	int res_y=-1;
-	if (bfs(start_x, start_y, &res_x, &res_y, "B")) {
+	string answer = "";
+	if (bfs(answer,start_x, start_y, &res_x, &res_y, "B")) {
 		if(res_x==-1 && res_y==-1) return "Impossible";
-		cout << res_x << res_y;
-		ans = wayTrace[res_x][res_y].dir;
-		return ans;
+		return answer;
 	}
 	else return "Impossible";
 }
@@ -72,7 +76,22 @@ bool graph::is_corner(int nx, int ny) {
 	else return false;
 }
 
-bool graph::bfs(int start_x, int start_y, int* res_x, int* res_y, string goal) {
+string graph::record_trace(int start_x, int start_y, int nx, int ny) {
+	string answer = "";
+	cout << "start x : " << start_x << " start_y: " << start_y << endl;
+	cout << "nx : " << nx << "ny : " << ny << endl;
+	int find_x = wayTrace[nx][ny].parent_x;
+	int find_y = wayTrace[nx][ny].parent_x;
+	cout << " find_x : " << find_x << "   find_y : " << find_y << endl;
+	/*do {
+		answer.append(wayTrace[find_x][find_y].dir, 0, 1);
+		find_x = wayTrace[find_x][find_y].parent_x;
+		find_y = wayTrace[find_x][find_y].parent_y;
+	} while (find_x != start_x && find_y != start_y);*/
+	return answer;
+}
+
+bool graph::bfs(string& answer,int start_x, int start_y, int* res_x, int* res_y, string goal) {
 	bool** visited = new bool * [x];
 	for (int i = 0; i < x; i++)
 		visited[i] = new bool[y];
@@ -87,13 +106,19 @@ bool graph::bfs(int start_x, int start_y, int* res_x, int* res_y, string goal) {
 		if (adjGraph[nx][ny].compare(goal)==0) {
 			(*res_x) = nx;
 			(*res_y) = ny;
-			if (goal.compare("F") == 0) return true;
-			if (goal.compare("T") == 0) return true;
+			if (goal.compare("F") == 0) {
+				answer.append(record_trace(start_x, start_y, nx, ny)); //F까지의 trace 추가해놓기
+				return true; }
+			if (goal.compare("T") == 0) { 
+				answer.append(record_trace(start_x,start_y,nx,ny)); //T까지의 trace 추가해놓기 
+				return true; }
 			int x3=-1;
 			int y3=-1;
 			bool flag=false;
 			if (goal.compare("B")==0) {
-				flag = bfs(nx, ny, &x3, &y3, "T");
+				answer=record_trace(start_x, start_y, nx, ny); 
+				 // B직전 까지의 trace 저장하기 
+				flag = bfs(answer,nx, ny, &x3, &y3, "T");
 				if (is_corner(nx, ny) == false && flag && (x3 != -1 && y3 != -1)) {
 					(*res_x) = x3;
 					(*res_y) = y3;
@@ -103,12 +128,14 @@ bool graph::bfs(int start_x, int start_y, int* res_x, int* res_y, string goal) {
 				adjGraph[x3][y3] = "F";
 				goal = "F";
 				adjGraph[nx][ny] = ".";
+				start_x = wayTrace[nx][ny].parent_x;
+				start_x = wayTrace[nx][ny].parent_y;
 			}
 		}
 		if (nx != 0 && adjGraph[nx - 1][ny].compare("#") != 0 && visited[nx - 1][ny] != true) {
 			string dir;
-			if (goal == "B") dir = wayTrace[nx][ny].dir.append("n");
-			else dir = wayTrace[nx][ny].dir.append("N");
+			if (goal == "B") dir ="n";
+			else dir ="N";
 			pair_info p(nx, ny, dir);
 			wayTrace[nx - 1][ny] = p;
 			set s(nx - 1, ny);
@@ -117,8 +144,8 @@ bool graph::bfs(int start_x, int start_y, int* res_x, int* res_y, string goal) {
 		}
 		if (ny != 0 && adjGraph[nx][ny-1].compare("#") != 0 && visited[nx][ny-1] != true) {
 			string dir;
-			if (goal == "B") dir = wayTrace[nx][ny].dir.append("w");
-			else dir = wayTrace[nx][ny].dir.append("W");
+			if (goal == "B") dir = "w";
+			else dir = "W";
 			pair_info p(nx, ny, dir);
 			wayTrace[nx][ny-1] = p;
 			set s(nx, ny-1);
@@ -127,8 +154,8 @@ bool graph::bfs(int start_x, int start_y, int* res_x, int* res_y, string goal) {
 		}
 		if (nx != x-1 && adjGraph[nx +1 ][ny].compare("#")!=0 && visited[nx +1][ny] != true) {
 			string dir;
-			if (goal == "B") dir = wayTrace[nx][ny].dir.append("s");
-			else dir = wayTrace[nx][ny].dir.append("S");
+			if (goal == "B") dir = "s";
+			else dir = "S";
 			pair_info p(nx, ny, dir);
 			wayTrace[nx +1][ny] = p;
 			set s(nx+1, ny);
@@ -137,8 +164,8 @@ bool graph::bfs(int start_x, int start_y, int* res_x, int* res_y, string goal) {
 		}
 		if (ny!= y-1 && adjGraph[nx][ny+1].compare("#") != 0 && visited[nx][ny+1] != true) {
 			string dir;
-			if (goal == "B") dir = wayTrace[nx][ny].dir.append("e");
-			else dir = wayTrace[nx][ny].dir.append("E");
+			if (goal == "B") dir = "e";
+			else dir = "E";
 			pair_info p(nx, ny, dir);
 			wayTrace[nx][ny+1] = p;
 			set s(nx, ny+1);
